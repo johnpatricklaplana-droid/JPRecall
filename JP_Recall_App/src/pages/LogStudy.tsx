@@ -17,7 +17,6 @@ const pad = (value: number) => String(value).padStart(2, "0");
 const toInputDate = (date: Date): string =>
     `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
-// Parses and validates YYYY-MM-DD.
 const parseInputDate = (value: string): Date | null => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
 

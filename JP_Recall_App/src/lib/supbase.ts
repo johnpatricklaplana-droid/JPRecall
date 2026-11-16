@@ -5,5 +5,12 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(
     supabaseUrl,
-    supabaseAnonKey
+    supabaseAnonKey,
+    {
+        global: {
+            headers: {
+                "x-timezone": Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+            },
+        }
+    }
 );
