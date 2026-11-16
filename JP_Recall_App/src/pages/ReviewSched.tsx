@@ -43,37 +43,47 @@ export default function ReviewSchedulePage() {
                 <h1 className="text-base font-medium text-[#F9FAFB]">
                     Review Schedule
                 </h1>
-                <p className="text-sm text-[#9CA3AF]">Monday, November 16</p>
+                <p className="text-sm text-[#9CA3AF]">{new Date().toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                })}</p>
             </header>
 
-            <section className="mt-8 rounded-xl bg-[#1F2937] p-6 sm:p-7">
+            <section className="mt-8">
                 <h2 className="text-xs font-medium uppercase tracking-wider text-[#9CA3AF]">
                     Today
                 </h2>
-                <p className="mt-2 text-2xl font-medium text-[#F9FAFB]">
-                    2 topics to review
+                <p className="mt-4 mb-2 text-xl font-medium text-[#F9FAFB]">
+                    {today.length} topic {today.length > 1 ? 's' : ''} to review
                 </p>
-                {today.map(t =>
-                    <DynamicBox key={t.id} review={t} />
-                )}
+                <div className="grid grid-cols-2 gap-4">
+                    {today.map(t =>
+                        <DynamicBox key={t.id} review={t} />
+                    )}
+                </div>
             </section>
 
             <section className="mt-11">
                 <h2 className="text-xs font-medium uppercase tracking-wider text-[#9CA3AF]">
-                    Overdue · 2
+                    Overdue · {past.length}
                 </h2>
-                {past.map(p =>
-                    <DynamicBox key={p.id} review={p} />
-                )}
+                <div className="space-y-4 mt-4">
+                    {past.map(p =>
+                        <DynamicBox key={p.id} review={p} />
+                    )}
+                </div>
             </section>
 
             <section className="mt-10">
-                <h2 className="text-xs font-medium uppercase tracking-wider text-[#9CA3AF]">
-                    Upcoming · 4
+                <h2 className="text-xs font-medium uppercase tracking-wider text-green-500">
+                    Upcoming · {future.length}
                 </h2>
-                {future.map(f => 
-                    <DynamicBox key={f.id} review={f} />
-                )}
+                <div className="grid mt-4 grid-cols-2 gap-4">
+                    {future.map(f =>
+                        <DynamicBox key={f.id} review={f} />
+                    )}
+                </div>
             </section>
             
         </div>
