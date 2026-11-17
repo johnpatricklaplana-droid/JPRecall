@@ -1,3 +1,4 @@
+import { Brain } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -96,10 +97,12 @@ export default function Sidebar() {
                         </li>
                         <li>
                             <button type="button" className={idle}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={icon}>
-                                    <path d="M4 6h16M4 12h16M4 18h10" />
-                                </svg>
-                                <span>My Topics</span>
+                                <Brain
+                                    className={icon}
+                                    strokeWidth={1.75}
+                                    aria-hidden="true"
+                                />
+                                <span>Long term memory</span>
                             </button>
                         </li>
                     </ul>

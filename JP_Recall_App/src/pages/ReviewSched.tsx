@@ -224,7 +224,7 @@ export default function ReviewSchedulePage() {
                 <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[360px_minmax(0,1fr)] xl:grid-cols-[400px_minmax(0,1fr)]">
 
                     {/* Overview */}
-                    <aside className="rounded-2xl border border-[#293648] bg-[#111923] p-6 shadow-sm sm:p-7">
+                    <aside className="rounded-2xl sm:sticky sm:top-7 border border-[#293648] bg-[#111923] p-6 shadow-sm sm:p-7">
                         <div className="flex items-start justify-between gap-3">
                             <div>
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8291A5]">

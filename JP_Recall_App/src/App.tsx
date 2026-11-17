@@ -4,6 +4,7 @@ import ReviewSchedulePage from "./pages/ReviewSched";
 import Sidebar from "./components/Sidebar";
 import RegisterPage from "./RegisterPage";
 import AuthCallback from "./AuthCallback";
+import LongTermMemoryPage from "./pages/LongTermMemo";
 
 function Layout() {
     return (
@@ -28,6 +29,7 @@ export default function App() {
                 {/* With sidebar */}
                 <Route element={<Layout />}>
                     <Route path="/to-review" element={<LogStudyPage />} />
+                    <Route path="/long-term-memory" element={<LongTermMemoryPage />} />
                     <Route path="/review" element={<ReviewSchedulePage />} />
                     <Route path="/my-topics" element={<div className="p-8 text-white">My Topics</div>} />
                     <Route path="/review-history" element={<div className="p-8 text-white">Review History</div>} />

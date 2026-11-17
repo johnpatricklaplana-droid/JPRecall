@@ -1,3 +1,5 @@
+
+import { useRef, useState } from "react";
 import { getDateStatus, type DateStatus } from "../helpers/dateHelper";
 import type { Review } from "../types/types";
 
@@ -69,12 +71,38 @@ function ActionMenu({
     onMarkReviewed,
     isMarking,
 }: ActionMenuProps) {
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const [opensUp, setOpensUp] = useState(false);
+
+    const updateMenuPosition = () => {
+        const trigger = triggerRef.current;
+
+        if (!trigger) return;
+
+        const rect = trigger.getBoundingClientRect();
+
+        const spaceAbove = rect.top;
+        const spaceBelow = window.innerHeight - rect.bottom;
+
+        // Approximate height of the complete dropdown.
+        const menuHeight = 200;
+        const gap = 8;
+
+        setOpensUp(
+            spaceBelow < menuHeight + gap &&
+            spaceAbove > spaceBelow
+        );
+    };
+
     return (
         <div className="group/menu relative z-20 shrink-0">
             <button
+                ref={triggerRef}
                 type="button"
                 aria-label="Review actions"
                 aria-haspopup="true"
+                onMouseEnter={updateMenuPosition}
+                onFocus={updateMenuPosition}
                 className="rounded-lg p-2 text-[#8291A5] transition-colors hover:bg-white/[0.07] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B66A]"
             >
                 <svg
@@ -88,7 +116,13 @@ function ActionMenu({
                 </svg>
             </button>
 
-            <div className="absolute right-0 top-full hidden w-48 pt-2 group-hover/menu:block group-focus-within/menu:block">
+            {/* Automatically changes dropdown direction */}
+            <div
+                className={`absolute right-0 z-50 hidden w-48 group-hover/menu:block group-focus-within/menu:block ${opensUp
+                        ? "bottom-full pb-2"
+                        : "top-full pt-2"
+                    }`}
+            >
                 <div className="overflow-hidden rounded-xl border border-[#344256] bg-[#17212D] p-1.5 shadow-xl shadow-black/40">
 
                     <button
