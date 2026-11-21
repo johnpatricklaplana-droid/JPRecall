@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { register } from "./services/auth";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -196,12 +197,12 @@ export default function RegisterPage() {
 
             <p className="mt-6 text-sm text-[#9CA3AF]">
                 Already have an account?{" "}
-                <a
-                    href="/login"
+                <Link
+                    to="/login"
                     className="font-medium text-[#D6B66A] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8954B]"
                 >
                     Log in
-                </a>
+                </Link>
             </p>
         </div>
     );

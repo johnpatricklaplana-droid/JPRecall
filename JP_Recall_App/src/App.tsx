@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar";
 import RegisterPage from "./RegisterPage";
 import AuthCallback from "./AuthCallback";
 import LongTermMemoryPage from "./pages/LongTermMemo";
+import LoginPage from "./LoginPage";
 
 function Layout() {
     return (
@@ -51,7 +52,7 @@ function RootDestination() {
     }, []);
 
     if (isLoading) return <FullPageStatus text="Checking your session..." />;
-    return <Navigate to={isAuthenticated ? "/review" : "/register"} replace />;
+    return <Navigate to={isAuthenticated ? "/review" : "/login"} replace />;
 }
 
 function ProtectedRoute({ children }: Readonly<{ children: ReactNode }>) {
@@ -89,7 +90,7 @@ function ProtectedRoute({ children }: Readonly<{ children: ReactNode }>) {
 
     if (isLoading) return <FullPageStatus text="Checking your session..." />;
     if (!isAuthenticated) {
-        return <Navigate to="/register" replace state={{ from: location.pathname }} />;
+        return <Navigate to="/login" replace state={{ from: location.pathname }} />;
     }
 
     return children;
@@ -100,6 +101,7 @@ export default function App() {
         <BrowserRouter>
             <Routes>
                 {/* No sidebar */}
+                <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/auth-callback" element={<AuthCallback />} />
                 <Route path="/" element={<RootDestination />} />
