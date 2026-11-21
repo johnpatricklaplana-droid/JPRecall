@@ -27,7 +27,7 @@ export default function AuthCallback() {
                 return;
             }
 
-            navigate("/to-review", { replace: true });
+            navigate("/review", { replace: true });
         }
 
         handleCallback();

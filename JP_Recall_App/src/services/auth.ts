@@ -6,7 +6,7 @@ export async function register(email: string, password: string) {
         email: email,
         password: password,
         options: {
-            emailRedirectTo: "http://localhost:5173/auth/callback"
+            emailRedirectTo: `${window.location.origin}/auth-callback`
         }
     });
 
