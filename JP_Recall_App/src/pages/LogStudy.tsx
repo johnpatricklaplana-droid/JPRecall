@@ -1,65 +1,24 @@
 
 import { useState, type FormEvent } from "react";
 import { supabase } from "../lib/supbase";
-
-const OPTIONS = [
-    { id: "1d", label: "1 day", days: 1 },
-    { id: "3d", label: "3 days", days: 3 },
-    { id: "1w", label: "1 week", days: 7 },
-    { id: "custom", label: "Custom date", days: null },
-] as const;
-
-type IntervalId = (typeof OPTIONS)[number]["id"];
-
-const pad = (value: number) => String(value).padStart(2, "0");
-
-// Converts a local Date to YYYY-MM-DD without timezone conversion.
-const toInputDate = (date: Date): string =>
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-
-const parseInputDate = (value: string): Date | null => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-
-    const [year, month, day] = value.split("-").map(Number);
-    const date = new Date(year, month - 1, day);
-
-    if (
-        date.getFullYear() !== year ||
-        date.getMonth() !== month - 1 ||
-        date.getDate() !== day
-    ) {
-        return null;
-    }
-
-    return date;
-};
-
-const addDays = (days: number): string => {
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    return toInputDate(date);
-};
-
-const formatDate = (
-    value: string,
-    options: Intl.DateTimeFormatOptions
-): string => {
-    const date = parseInputDate(value);
-
-    return date
-        ? date.toLocaleDateString("en-US", options)
-        : "Pick a date";
-};
+import ReviewSchedulePicker from "../components/ReviewSchedulePicker";
+import {
+    formatDate,
+    getMinimumReviewDate,
+    parseInputDate,
+    resolveReviewDate,
+    type ReviewIntervalId,
+} from "../helpers/dateHelper";
 
 export default function LogStudyPage() {
     const [topic, setTopic] = useState("");
-    const [interval, setInterval] = useState<IntervalId>("1d");
+    const [interval, setInterval] = useState<ReviewIntervalId>("1d");
     const [customDate, setCustomDate] = useState("");
     const [topicError, setTopicError] = useState("");
     const [dateError, setDateError] = useState("");
     const [confirmation, setConfirmation] = useState("");
 
-    const minDate = addDays(1);
+    const minDate = getMinimumReviewDate();
 
     const clearMessages = () => {
         setTopicError("");
@@ -78,14 +37,7 @@ export default function LogStudyPage() {
             return;
         }
 
-        const selectedOption = OPTIONS.find(
-            (option) => option.id === interval
-        );
-
-        const reviewDate =
-            interval === "custom"
-                ? customDate
-                : addDays(selectedOption?.days ?? 1);
+        const reviewDate = resolveReviewDate(interval, customDate);
 
         const parsedDate = parseInputDate(reviewDate);
 
@@ -125,24 +77,6 @@ export default function LogStudyPage() {
         setTopic("");
         setInterval("1d");
         setCustomDate("");
-    };
-
-    const getOptionDateText = (option: (typeof OPTIONS)[number]) => {
-        if (option.days !== null) {
-            return formatDate(addDays(option.days), {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-            });
-        }
-
-        return customDate >= minDate
-            ? formatDate(customDate, {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-            })
-            : "Pick a date";
     };
 
     return (
@@ -205,88 +139,22 @@ export default function LogStudyPage() {
                             </div>
 
                             {/* Review schedule */}
-                            <fieldset>
-                                <legend className="text-sm font-medium text-[#F9FAFB]">
-                                    When should you review it?
-                                </legend>
-
-                                <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                                    {OPTIONS.map((option) => (
-                                        <label
-                                            key={option.id}
-                                            className="block cursor-pointer"
-                                        >
-                                            <input
-                                                type="radio"
-                                                name="review-interval"
-                                                value={option.id}
-                                                checked={interval === option.id}
-                                                onChange={() => {
-                                                    setInterval(option.id);
-                                                    setDateError("");
-                                                    setConfirmation("");
-                                                }}
-                                                className="peer sr-only"
-                                            />
-
-                                            <span className="group relative flex h-full flex-col gap-1 rounded-md border border-[#374151] bg-[#111827] px-4 py-4 transition-colors hover:border-[#9CA3AF]/60 peer-checked:border-[#B8954B] peer-checked:bg-[#B8954B]/10 peer-focus-visible:ring-2 peer-focus-visible:ring-[#B8954B] [&_.dot]:peer-checked:border-[#D6B66A] [&_.dot]:peer-checked:bg-[#D6B66A] [&_.label]:peer-checked:text-[#D6B66A] [&_.date]:peer-checked:text-[#F9FAFB]">
-                                                <span
-                                                    aria-hidden="true"
-                                                    className="dot absolute right-3 top-3.5 h-2.5 w-2.5 rounded-full border border-[#9CA3AF]/60"
-                                                />
-
-                                                <span className="label pr-5 text-sm font-medium text-[#F9FAFB]">
-                                                    {option.label}
-                                                </span>
-
-                                                <span className="date text-xs text-[#9CA3AF]">
-                                                    {getOptionDateText(option)}
-                                                </span>
-                                            </span>
-                                        </label>
-                                    ))}
-                                </div>
-
-                                {interval === "custom" && (
-                                    <div className="mt-5">
-                                        <label
-                                            htmlFor="custom-date"
-                                            className="block text-sm text-[#9CA3AF]"
-                                        >
-                                            Review date
-                                        </label>
-
-                                        <input
-                                            id="custom-date"
-                                            type="date"
-                                            value={customDate}
-                                            min={minDate}
-                                            onChange={(e) => {
-                                                setCustomDate(e.target.value);
-                                                setDateError("");
-                                                setConfirmation("");
-                                            }}
-                                            aria-invalid={!!dateError}
-                                            aria-describedby={
-                                                dateError ? "date-error" : undefined
-                                            }
-                                            className={`mt-2 w-full rounded-md border bg-[#111827] px-4 py-3 text-sm text-[#F9FAFB] [color-scheme:dark] focus:outline-none focus:ring-1 sm:w-72 ${dateError
-                                                    ? "border-red-400 focus:border-red-400 focus:ring-red-400"
-                                                    : "border-[#374151] focus:border-[#B8954B] focus:ring-[#B8954B]"
-                                                }`}
-                                        />
-
-                                        {dateError && (
-                                            <p
-                                                id="date-error"
-                                                className="mt-2 text-sm text-red-400"
-                                            >
-                                                {dateError}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                            </fieldset>
+                            <ReviewSchedulePicker
+                                groupName="review-interval"
+                                interval={interval}
+                                customDate={customDate}
+                                dateError={dateError}
+                                onIntervalChange={(nextInterval) => {
+                                    setInterval(nextInterval);
+                                    setDateError("");
+                                    setConfirmation("");
+                                }}
+                                onCustomDateChange={(nextDate) => {
+                                    setCustomDate(nextDate);
+                                    setDateError("");
+                                    setConfirmation("");
+                                }}
+                            />
 
                             {/* Informational note */}
                             <div className="flex items-center gap-4 rounded-md border-l-2 border-[#B8954B] bg-[#B8954B]/10 px-4 py-3.5">

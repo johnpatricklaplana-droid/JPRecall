@@ -3,4 +3,5 @@ export interface Review {
     name: string;
     scheduled_at: string;
     created_at: string;
+    is_reviewed?: boolean;
 }

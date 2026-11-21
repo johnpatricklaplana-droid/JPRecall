@@ -1,6 +1,6 @@
 import { Brain } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const base =
     "flex w-full cursor-pointer items-center gap-3 rounded-md border-l-2 px-3 py-2 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8954B]";
@@ -78,67 +78,97 @@ export default function Sidebar() {
                     <p className={label}>Study</p>
                     <ul className="space-y-1">
                         <li>
-                            <Link to={'to-review'} aria-current="page" className={active}>
+                            <NavLink
+                                to="/to-review"
+                                end
+                                onClick={() => setOpen(false)}
+                                className={({ isActive }) => isActive ? active : idle}
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={icon}>
                                     <circle cx="12" cy="12" r="9" />
                                     <path d="M12 8v8M8 12h8" />
                                 </svg>
                                 <span>Log Study</span>
-                            </Link>
+                            </NavLink>
                         </li>
                         <li>
-                            <Link to={'review'} className={idle}>
+                            <NavLink
+                                to="/review"
+                                end
+                                onClick={() => setOpen(false)}
+                                className={({ isActive }) => isActive ? active : idle}
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={icon}>
                                     <rect x="3" y="5" width="18" height="16" rx="2" />
                                     <path d="M16 3v4M8 3v4M3 11h18" />
                                 </svg>
                                 <span>Review Schedule</span>
-                            </Link>
+                            </NavLink>
                         </li>
                         <li>
-                            <button type="button" className={idle}>
+                            <NavLink
+                                to="/long-term-memory"
+                                end
+                                onClick={() => setOpen(false)}
+                                className={({ isActive }) => isActive ? active : idle}
+                            >
                                 <Brain
                                     className={icon}
                                     strokeWidth={1.75}
                                     aria-hidden="true"
                                 />
                                 <span>Long term memory</span>
-                            </button>
+                            </NavLink>
                         </li>
                     </ul>
 
                     <p className={`${label} pt-6`}>Progress</p>
                     <ul className="space-y-1">
                         <li>
-                            <button type="button" className={idle}>
+                            <NavLink
+                                to="/review-history"
+                                end
+                                onClick={() => setOpen(false)}
+                                className={({ isActive }) => isActive ? active : idle}
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={icon}>
                                     <circle cx="12" cy="12" r="9" />
                                     <path d="M12 7v5l3 2" />
                                 </svg>
                                 <span>Review History</span>
-                            </button>
+                            </NavLink>
                         </li>
                         <li>
-                            <button type="button" className={idle}>
+                            <NavLink
+                                to="/statistics"
+                                end
+                                onClick={() => setOpen(false)}
+                                className={({ isActive }) => isActive ? active : idle}
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={icon}>
                                     <path d="M5 20v-9M12 20V5M19 20v-6" />
                                 </svg>
                                 <span>Statistics</span>
-                            </button>
+                            </NavLink>
                         </li>
                     </ul>
                 </nav>
 
                 {/* Bottom */}
                 <div className="border-t border-[#374151] px-3 py-3">
-                    <button type="button" className={idle}>
+                    <NavLink
+                        to="/settings"
+                        end
+                        onClick={() => setOpen(false)}
+                        className={({ isActive }) => isActive ? active : idle}
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={icon}>
                             <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
                             <circle cx="16" cy="7" r="2" />
                             <circle cx="8" cy="17" r="2" />
                         </svg>
                         <span>Settings</span>
-                    </button>
+                    </NavLink>
                 </div>
             </aside>
         </>
