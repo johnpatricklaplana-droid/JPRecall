@@ -30,3 +30,24 @@ export async function login(email: string, password: string) {
 
     return data;
 }
+
+export async function logout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+        throw error;
+    }
+}
+
+export async function loginWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+            redirectTo: `${window.location.origin}/auth-callback`,
+        },
+    });
+
+    if (error) {
+        throw error;
+    }
+}

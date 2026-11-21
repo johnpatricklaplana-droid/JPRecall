@@ -157,7 +157,7 @@ export default function Sidebar() {
                 {/* Bottom */}
                 <div className="border-t border-[#374151] px-3 py-3">
                     <NavLink
-                        to="/settings"
+                        to="/profile"
                         end
                         onClick={() => setOpen(false)}
                         className={({ isActive }) => isActive ? active : idle}
@@ -167,7 +167,7 @@ export default function Sidebar() {
                             <circle cx="16" cy="7" r="2" />
                             <circle cx="8" cy="17" r="2" />
                         </svg>
-                        <span>Settings</span>
+                        <span>Profile</span>
                     </NavLink>
                 </div>
             </aside>

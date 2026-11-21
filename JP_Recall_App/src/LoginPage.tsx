@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "./lib/supbase";
-import { login } from "./services/auth";
+import { login, loginWithGoogle } from "./services/auth";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -103,6 +103,25 @@ export default function LoginPage() {
         }
     };
 
+    const handleGoogleLogin = async () => {
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+        setLoginError("");
+
+        try {
+            await loginWithGoogle();
+        } catch (error) {
+            console.error("Failed to start Google login:", error);
+            setLoginError(
+                error instanceof Error
+                    ? error.message
+                    : "Unable to log in with Google. Please try again."
+            );
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-[#111827] px-4 py-12 text-[#F9FAFB]">
             <div className="flex items-center gap-3">
@@ -118,7 +137,28 @@ export default function LoginPage() {
                     Log in to continue reviewing your topics.
                 </p>
 
-                <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-5">
+                <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={isSubmitting}
+                    className="mt-6 flex w-full items-center justify-center gap-3 rounded-md border border-[#374151] bg-[#111827] px-4 py-3 text-sm font-medium text-[#F9FAFB] transition-colors hover:border-[#9CA3AF]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8954B] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.4a4.6 4.6 0 0 1-2 3v2.5h3.3c1.9-1.8 2.9-4.4 2.9-7.4Z" />
+                        <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2.1 1-3.4 1a5.9 5.9 0 0 1-5.5-4.1H3.1v2.6A10 10 0 0 0 12 22Z" />
+                        <path fill="#FBBC05" d="M6.5 14a6 6 0 0 1 0-3.9V7.5H3.1a10 10 0 0 0 0 9l3.4-2.6Z" />
+                        <path fill="#EA4335" d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.5l3.4 2.6A5.9 5.9 0 0 1 12 6Z" />
+                    </svg>
+                    Continue with Google
+                </button>
+
+                <div className="my-6 flex items-center gap-4">
+                    <span className="h-px flex-1 bg-[#374151]" />
+                    <span className="text-xs uppercase tracking-wider text-[#9CA3AF]">or</span>
+                    <span className="h-px flex-1 bg-[#374151]" />
+                </div>
+
+                <form onSubmit={handleSubmit} noValidate className="space-y-5">
                     <div>
                         <label htmlFor="login-email" className="block text-sm font-medium">
                             Email

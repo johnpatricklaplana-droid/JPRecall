@@ -8,6 +8,7 @@ import RegisterPage from "./RegisterPage";
 import AuthCallback from "./AuthCallback";
 import LongTermMemoryPage from "./pages/LongTermMemo";
 import LoginPage from "./LoginPage";
+import ProfilePage from "./ProfilePage";
 
 function Layout() {
     return (
@@ -115,6 +116,7 @@ export default function App() {
                     <Route path="/review-history" element={<div className="p-8 text-white">Review History</div>} />
                     <Route path="/statistics" element={<div className="p-8 text-white">Statistics</div>} />
                     <Route path="/settings" element={<div className="p-8 text-white">Settings</div>} />
+                    <Route path="/profile" element={<ProfilePage />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

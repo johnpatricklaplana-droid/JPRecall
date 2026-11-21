@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { register } from "./services/auth";
+import { loginWithGoogle, register } from "./services/auth";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -15,11 +15,13 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
+    const [authError, setAuthError] = useState("");
     const [done, setDone] = useState(false);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setDone(false);
+        setAuthError("");
 
         const trimmed = email.trim();
         let valid = true;
@@ -50,12 +52,27 @@ export default function RegisterPage() {
             const data = await register(email, password);
             setDone(true);
         } catch (error) {
-            console.log("todo");
+            console.error("Failed to create account:", error);
+            setAuthError(
+                error instanceof Error
+                    ? error.message
+                    : "Unable to create your account. Please try again."
+            );
         }
     };
 
-    const handleGoogle = () => {
-        // TODO: call your Google sign-up here
+    const handleGoogle = async () => {
+        setAuthError("");
+        try {
+            await loginWithGoogle();
+        } catch (error) {
+            console.error("Failed to start Google sign-up:", error);
+            setAuthError(
+                error instanceof Error
+                    ? error.message
+                    : "Unable to continue with Google. Please try again."
+            );
+        }
     };
 
     return (
@@ -171,6 +188,15 @@ export default function RegisterPage() {
                     >
                         Create account
                     </button>
+
+                    {authError && (
+                        <div
+                            role="alert"
+                            className="rounded-md border border-red-400/20 bg-red-400/10 px-3 py-2.5 text-sm text-red-300"
+                        >
+                            {authError}
+                        </div>
+                    )}
 
                     <div role="status" aria-live="polite">
                         {done && (
