@@ -1,12 +1,17 @@
 import { supabase } from "../lib/supbase";
 
+function getAuthCallbackUrl() {
+    const appUrl = import.meta.env.VITE_APP_URL?.trim() || window.location.origin;
+    return new URL("/auth-callback", appUrl).toString();
+}
+
 export async function register(email: string, password: string) {
     
     const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
-            emailRedirectTo: `${window.location.origin}/auth-callback`
+            emailRedirectTo: getAuthCallbackUrl(),
         }
     });
 
@@ -43,7 +48,7 @@ export async function loginWithGoogle() {
     const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-            redirectTo: `${window.location.origin}/auth-callback`,
+            redirectTo: getAuthCallbackUrl(),
         },
     });
 

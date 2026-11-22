@@ -95,11 +95,14 @@ npm install
 Create a local environment file:
 
 ```dotenv
+VITE_APP_URL=http://localhost:5173
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-These values are read by `src/lib/supbase.ts`.
+`VITE_APP_URL` is the app's public origin and is used to build the email and OAuth callback URL. Set it to the deployed app origin in Vercel's environment variables (for example, `https://your-app.vercel.app`) and redeploy. Do not include `/auth-callback` in this value.
+
+The Supabase values are read by `src/lib/supbase.ts`.
 
 Restart Vite after adding or changing environment variables.
 
@@ -123,14 +126,12 @@ The table should expose `id`, `name`, `scheduled_at`, `created_at`, and `is_revi
 
 ### 4. Configure authentication redirects
 
-In the Supabase dashboard, open **Authentication > URL Configuration** and allow:
+In the Supabase dashboard, open **Authentication > URL Configuration**, set the **Site URL** to the production app origin, and allow the local and production callback URLs:
 
 ```text
-http://localhost:5173
 http://localhost:5173/auth-callback
+https://your-app.vercel.app/auth-callback
 ```
-
-For production, replace the origin with the deployed application URL.
 
 The app uses the `/auth-callback` route to exchange OAuth or email confirmation codes for a Supabase session.
 
