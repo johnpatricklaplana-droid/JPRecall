@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { supabase } from "./lib/supbase";
-import LogStudyPage from "./pages/LogStudy";
 import ReviewSchedulePage from "./pages/ReviewSched";
 import Sidebar from "./components/Sidebar";
 import RegisterPage from "./RegisterPage";
@@ -109,7 +108,6 @@ export default function App() {
 
                 {/* With sidebar */}
                 <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-                    <Route path="/to-review" element={<LogStudyPage />} />
                     <Route path="/long-term-memory" element={<LongTermMemoryPage />} />
                     <Route path="/review" element={<ReviewSchedulePage />} />
                     <Route path="/my-topics" element={<div className="p-8 text-white">My Topics</div>} />

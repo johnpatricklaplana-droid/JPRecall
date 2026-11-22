@@ -79,20 +79,6 @@ export default function Sidebar() {
                     <ul className="space-y-1">
                         <li>
                             <NavLink
-                                to="/to-review"
-                                end
-                                onClick={() => setOpen(false)}
-                                className={({ isActive }) => isActive ? active : idle}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={icon}>
-                                    <circle cx="12" cy="12" r="9" />
-                                    <path d="M12 8v8M8 12h8" />
-                                </svg>
-                                <span>Log Study</span>
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink
                                 to="/review"
                                 end
                                 onClick={() => setOpen(false)}

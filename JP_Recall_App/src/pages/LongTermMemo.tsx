@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BrainCircuit, RotateCcw, Search, Trash2 } from "lucide-react";
 import { supabase } from "../lib/supbase";
 import ReviewSchedulePicker from "../components/ReviewSchedulePicker";
+import SkeletonBlock from "../components/SkeletonBlock";
 import {
     formatDate,
     getMinimumReviewDate,
@@ -242,7 +243,13 @@ export default function LongTermMemoryPage() {
                             <p className="text-sm font-medium text-[#94A3B8]">Stored topics</p>
                             <div className="mt-2 flex items-end justify-between gap-3">
                                 <span className="text-5xl font-bold tracking-tight text-white">
-                                    {topics.length}
+                                    {isLoading ? (
+                                        <SkeletonBlock className="h-12 w-16" />
+                                    ) : fetchError ? (
+                                        "—"
+                                    ) : (
+                                        topics.length
+                                    )}
                                 </span>
                                 <span className="mb-1 text-xs text-[#8291A5]">
                                     In long-term memory
@@ -258,7 +265,13 @@ export default function LongTermMemoryPage() {
                                         <span className="h-2.5 w-2.5 rounded-full bg-[#E5B94F]" />
                                         Reviewed this month
                                     </span>
-                                    <span className="text-lg font-semibold tabular-nums text-[#E5E7EB]">{thisMonth}</span>
+                                    {isLoading ? (
+                                        <SkeletonBlock className="h-6 w-8" />
+                                    ) : (
+                                        <span className="text-lg font-semibold tabular-nums text-[#E5E7EB]">
+                                            {fetchError ? "—" : thisMonth}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -275,7 +288,13 @@ export default function LongTermMemoryPage() {
                                 </p>
                             </div>
                             <span className="rounded-lg border border-[#293648] bg-[#111923] px-3 py-1.5 text-xs text-[#94A3B8]">
-                                {filteredTopics.length} topics
+                                {isLoading ? (
+                                    <SkeletonBlock className="h-3 w-16" />
+                                ) : fetchError ? (
+                                    "— topics"
+                                ) : (
+                                    `${filteredTopics.length} topics`
+                                )}
                             </span>
                         </div>
 
@@ -291,8 +310,30 @@ export default function LongTermMemoryPage() {
                         </div>
 
                         {isLoading ? (
-                            <div className="rounded-xl border border-[#293648] bg-[#141D29] px-4 py-10 text-center text-sm text-[#94A3B8]">
-                                Loading memory library...
+                            <div
+                                role="status"
+                                aria-label="Loading memory library"
+                                className="space-y-2.5"
+                            >
+                                <span className="sr-only">Loading memory library...</span>
+                                {Array.from({ length: 4 }, (_, index) => (
+                                    <article
+                                        key={index}
+                                        aria-hidden="true"
+                                        className="flex flex-wrap items-center gap-4 rounded-xl border border-white/[0.07] bg-[#141D29] px-4 py-3.5 sm:flex-nowrap"
+                                    >
+                                        <SkeletonBlock className="h-2.5 w-2.5 shrink-0 rounded-full" />
+                                        <div className="min-w-0 flex-1">
+                                            <SkeletonBlock className="h-4 w-2/5 max-w-48" />
+                                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                                                <SkeletonBlock className="h-4 w-16 rounded" />
+                                                <SkeletonBlock className="h-3 w-28" />
+                                            </div>
+                                        </div>
+                                        <SkeletonBlock className="h-9 w-32 rounded-lg" />
+                                        <SkeletonBlock className="h-9 w-9 rounded-lg" />
+                                    </article>
+                                ))}
                             </div>
                         ) : fetchError ? (
                             <div role="alert" className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-4 text-sm text-red-300">

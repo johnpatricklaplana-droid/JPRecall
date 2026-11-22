@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supbase";
 import { getDateStatus } from "../helpers/dateHelper";
 import DynamicBox from "../components/DynamicBox";
+import LogStudyModal from "../components/LogStudyModal";
+import SkeletonBlock from "../components/SkeletonBlock";
 import type { Review } from "../types/types";
 
 type ActionMessage = {
@@ -12,7 +14,11 @@ type ActionMessage = {
 
 export default function ReviewSchedulePage() {
     const [reviews, setReviews] = useState<Review[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [fetchError, setFetchError] = useState<string | null>(null);
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+    const [isLogStudyOpen, setIsLogStudyOpen] = useState(false);
+    const [reviewsRefreshKey, setReviewsRefreshKey] = useState(0);
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [markingReviewId, setMarkingReviewId] = useState<string | null>(null);
@@ -22,22 +28,45 @@ export default function ReviewSchedulePage() {
 
     // Fetch active review topics.
     useEffect(() => {
+        let isMounted = true;
+
         const fetchReviews = async () => {
-            const { data, error } = await supabase
-                .from("to_review")
-                .select("*")
-                .eq("is_reviewed", false);
+            setIsLoading(true);
+            setFetchError(null);
 
-            if (error) {
-                console.error("Failed to fetch reviews:", error);
-                return;
+            try {
+                const { data, error } = await supabase
+                    .from("to_review")
+                    .select("*")
+                    .eq("is_reviewed", false);
+
+                if (error) {
+                    console.error("Failed to fetch reviews:", error);
+                    if (isMounted) {
+                        setFetchError("Unable to load your review schedule.");
+                        setReviews([]);
+                    }
+                    return;
+                }
+
+                if (isMounted) setReviews(data ?? []);
+            } catch (error) {
+                console.error("Unexpected review fetch error:", error);
+                if (isMounted) {
+                    setFetchError("An unexpected error occurred while loading reviews.");
+                    setReviews([]);
+                }
+            } finally {
+                if (isMounted) setIsLoading(false);
             }
-
-            setReviews(data ?? []);
         };
 
         void fetchReviews();
-    }, []);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [reviewsRefreshKey]);
 
     // Mark a topic as reviewed.
     const handleMarkReviewed = async (review: Review) => {
@@ -262,7 +291,13 @@ export default function ReviewSchedulePage() {
 
                             <div className="mt-2 flex items-end justify-between gap-3">
                                 <span className="text-5xl font-bold tracking-tight text-white">
-                                    {reviews.length}
+                                    {isLoading ? (
+                                        <SkeletonBlock className="h-12 w-16" />
+                                    ) : fetchError ? (
+                                        "—"
+                                    ) : (
+                                        reviews.length
+                                    )}
                                 </span>
 
                                 <span className="mb-1 text-xs text-[#8291A5]">
@@ -278,9 +313,13 @@ export default function ReviewSchedulePage() {
                                     Schedule breakdown
                                 </h2>
 
-                                <span className="text-xs text-[#64748B]">
-                                    {reviews.length} total
-                                </span>
+                                {isLoading ? (
+                                    <SkeletonBlock className="h-3 w-12" />
+                                ) : (
+                                    <span className="text-xs text-[#64748B]">
+                                        {fetchError ? "— total" : `${reviews.length} total`}
+                                    </span>
+                                )}
                             </div>
 
                             <div className="mt-4 space-y-2">
@@ -297,9 +336,13 @@ export default function ReviewSchedulePage() {
                                             </span>
                                         </div>
 
-                                        <span className="text-lg font-semibold tabular-nums text-[#E5E7EB]">
-                                            {stat.count}
-                                        </span>
+                                        {isLoading ? (
+                                            <SkeletonBlock className="h-6 w-8" />
+                                        ) : (
+                                            <span className="text-lg font-semibold tabular-nums text-[#E5E7EB]">
+                                                {fetchError ? "—" : stat.count}
+                                            </span>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -319,24 +362,89 @@ export default function ReviewSchedulePage() {
                                 </p>
                             </div>
 
-                            <span className="rounded-lg border border-[#293648] bg-[#111923] px-3 py-1.5 text-xs text-[#94A3B8]">
-                                {reviews.length} topics
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="rounded-lg border border-[#293648] bg-[#111923] px-3 py-1.5 text-xs text-[#94A3B8]">
+                                    {isLoading ? (
+                                        <SkeletonBlock className="h-3 w-16" />
+                                    ) : fetchError ? (
+                                        "— topics"
+                                    ) : (
+                                        `${reviews.length} topics`
+                                    )}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLogStudyOpen(true)}
+                                    className="inline-flex items-center gap-2 rounded-lg bg-[#B8954B] px-4 py-2 text-sm font-semibold text-[#111827] transition-colors hover:bg-[#D6B66A] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B66A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111827]"
+                                >
+                                    <svg
+                                        aria-hidden="true"
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                    >
+                                        <path strokeLinecap="round" d="M12 5v14m-7-7h14" />
+                                    </svg>
+                                    Log study
+                                </button>
+                            </div>
                         </div>
 
                         {/* All topics in one continuous column */}
-                        <div className="space-y-2.5">
-                            {activeReviews.map(review => (
-                                <DynamicBox
-                                    key={review.id}
-                                    review={review}
-                                    onRequestDelete={requestDeleteReview}
-                                    onMarkReviewed={handleMarkReviewed}
-                                    markingReviewId={markingReviewId}
-                                />
-                            ))}
+                        {isLoading ? (
+                            <div
+                                role="status"
+                                aria-label="Loading review schedule"
+                                className="space-y-2.5"
+                            >
+                                <span className="sr-only">Loading review schedule...</span>
+                                {Array.from({ length: 4 }, (_, index) => (
+                                    <div
+                                        key={index}
+                                        aria-hidden="true"
+                                        className="flex min-w-0 items-center gap-4 rounded-xl border border-white/[0.07] bg-[#141D29] px-4 py-3.5"
+                                    >
+                                        <SkeletonBlock className="h-2.5 w-2.5 shrink-0 rounded-full" />
+                                        <div className="min-w-0 flex-1">
+                                            <SkeletonBlock className="h-4 w-2/5 max-w-48" />
+                                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                                                <SkeletonBlock className="h-4 w-16 rounded" />
+                                                <SkeletonBlock className="h-3 w-32" />
+                                            </div>
+                                        </div>
+                                        <SkeletonBlock className="h-9 w-9 shrink-0 rounded-lg" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : fetchError ? (
+                            <div
+                                role="alert"
+                                className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-4 text-sm text-red-300"
+                            >
+                                <p>{fetchError}</p>
+                                <button
+                                    type="button"
+                                    onClick={() => setReviewsRefreshKey((current) => current + 1)}
+                                    className="mt-3 rounded-lg border border-red-300/30 px-3 py-1.5 text-xs font-semibold text-red-200 transition-colors hover:bg-red-400/10"
+                                >
+                                    Try again
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-2.5">
+                                {activeReviews.map(review => (
+                                    <DynamicBox
+                                        key={review.id}
+                                        review={review}
+                                        onRequestDelete={requestDeleteReview}
+                                        onMarkReviewed={handleMarkReviewed}
+                                        markingReviewId={markingReviewId}
+                                    />
+                                ))}
 
-                            {activeReviews.length === 0 && (
+                                {activeReviews.length === 0 && (
                                 <div className="rounded-xl border border-dashed border-[#293648] bg-white/[0.015] px-4 py-10 text-center">
                                     <p className="text-sm font-medium text-[#CBD5E1]">
                                         No topics to review.
@@ -346,11 +454,19 @@ export default function ReviewSchedulePage() {
                                         Your review schedule is currently empty.
                                     </p>
                                 </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>
+
+            {isLogStudyOpen && (
+                <LogStudyModal
+                    onClose={() => setIsLogStudyOpen(false)}
+                    onSaved={() => setReviewsRefreshKey((current) => current + 1)}
+                />
+            )}
 
             {/* Delete confirmation dialog */}
             {selectedReview && (
