@@ -7,6 +7,10 @@ export const supabase = createClient(
     supabaseUrl,
     supabaseAnonKey,
     {
+        auth: {
+            flowType: "pkce",
+            detectSessionInUrl: false,
+        },
         global: {
             headers: {
                 "x-timezone": Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",

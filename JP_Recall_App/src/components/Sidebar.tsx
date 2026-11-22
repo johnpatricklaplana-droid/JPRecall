@@ -1,16 +1,78 @@
 import { Brain } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import ProfileAvatar from "./ProfileAvatar";
+import { supabase } from "../lib/supbase";
+
+type SidebarProfile = {
+    avatarUrl: string;
+    displayName: string;
+    email: string;
+};
 
 const base =
     "flex w-full cursor-pointer items-center gap-3 rounded-md border-l-2 px-3 py-2 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8954B]";
-const active = `${base} border-[#B8954B] bg-[#B8954B]/10 font-medium text-[#D6B66A]`;
+const active = `${base} border-[#B8954B] bg-transparent font-medium text-[#D6B66A]`;
 const idle = `${base} border-transparent text-[#9CA3AF] hover:bg-[#1F2937] hover:text-[#F9FAFB]`;
 const icon = "h-[18px] w-[18px] shrink-0";
 const label = "px-3 pb-2 text-xs font-medium uppercase tracking-wider text-[#9CA3AF]";
 
 export default function Sidebar() {
     const [open, setOpen] = useState(false);
+    const [profile, setProfile] = useState<SidebarProfile>({
+        avatarUrl: "",
+        displayName: "",
+        email: "",
+    });
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadProfile = async () => {
+            const { data, error } = await supabase.auth.getUser();
+
+            if (!isMounted) return;
+
+            if (error) {
+                console.error("Failed to load sidebar profile:", error);
+                return;
+            }
+
+            const user = data.user;
+            if (!user) return;
+
+            const metadata = user.user_metadata ?? {};
+            const identityMetadata = user.identities?.find(
+                (identity) => identity.identity_data
+            )?.identity_data ?? {};
+            const firstString = (...values: unknown[]) =>
+                values.find((value): value is string =>
+                    typeof value === "string" && value.trim().length > 0
+                ) ?? "";
+
+            setProfile({
+                avatarUrl: firstString(
+                    metadata.avatar_url,
+                    metadata.picture,
+                    identityMetadata.avatar_url,
+                    identityMetadata.picture
+                ),
+                displayName: firstString(
+                    metadata.full_name,
+                    metadata.name,
+                    identityMetadata.full_name,
+                    identityMetadata.name
+                ),
+                email: user.email ?? "",
+            });
+        };
+
+        void loadProfile();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     return (
         <>
@@ -148,12 +210,17 @@ export default function Sidebar() {
                         onClick={() => setOpen(false)}
                         className={({ isActive }) => isActive ? active : idle}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={icon}>
-                            <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
-                            <circle cx="16" cy="7" r="2" />
-                            <circle cx="8" cy="17" r="2" />
-                        </svg>
-                        <span>Profile</span>
+                        <ProfileAvatar
+                            {...profile}
+                            sizeClass="h-7 w-7"
+                            decorative
+                        />
+                        <span
+                            className="min-w-0 truncate"
+                            title={profile.displayName || profile.email || "Profile"}
+                        >
+                            {profile.displayName || profile.email || "Profile"}
+                        </span>
                     </NavLink>
                 </div>
             </aside>
